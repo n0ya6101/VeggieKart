@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const UnitSchema = new mongoose.Schema({
   name: { type: String, required: true }, 
   price: { type: Number, required: true },
-  discountPercentage: { type: Number, default: 0 } // New field
+  discountPercentage: { type: Number, default: 0 }
 });
 
 const ProductSchema = new mongoose.Schema({
