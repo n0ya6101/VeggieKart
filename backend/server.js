@@ -22,6 +22,19 @@ fastify.get('/', async (request, reply) => {
   return { hello: 'world' };
 });
 
+fastify.get('/api/products/:id', async (request, reply) => {
+  try {
+    const product = await Product.findById(request.params.id);
+    if (!product) {
+      return reply.status(404).send({ error: 'Product not found' });
+    }
+    reply.send(product);
+  } catch (err) {
+    fastify.log.error(err);
+    reply.status(500).send({ error: 'Failed to fetch product' });
+  }
+});
+
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
