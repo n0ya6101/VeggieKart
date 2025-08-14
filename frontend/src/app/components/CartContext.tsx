@@ -1,3 +1,5 @@
+// Better approach: Update CartContext.tsx to handle cart operations more efficiently
+
 'use client';
 
 import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
@@ -7,6 +9,7 @@ export interface Unit {
   price: number;
   discountPercentage?: number;
 }
+
 export interface Description {
   unit?: string;
   details?: string;
@@ -45,6 +48,8 @@ export interface CartItem {
 interface CartContextType {
   cart: CartItem[];
   handleQuantityChange: (product: Product, unit: Unit, change: number) => void;
+  // Add new method for direct cart item updates
+  updateCartItemQuantity: (productId: string, unitName: string, change: number) => void;
   cartItemCount: number;
   cartTotal: number;
   isLoggedIn: boolean; 
@@ -86,6 +91,35 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     alert(isLoggedIn ? "You have been logged out." : "You are now logged in!");
   };
 
+  // New method for updating cart items directly
+  const updateCartItemQuantity = (productId: string, unitName: string, change: number) => {
+    setCart(prevCart => {
+      const existingItemIndex = prevCart.findIndex(
+        item => item.productId === productId && item.unit.name === unitName
+      );
+      
+      if (existingItemIndex > -1) {
+        const existingItem = prevCart[existingItemIndex];
+        const newQuantity = existingItem.quantity + change;
+        
+        if (newQuantity > existingItem.maxOrderLimit) {
+          alert(`You can only add up to ${existingItem.maxOrderLimit} units of ${existingItem.name}.`);
+          return prevCart;
+        }
+        
+        if (newQuantity <= 0) {
+          return prevCart.filter((_, index) => index !== existingItemIndex);
+        } else {
+          return prevCart.map((item, index) => 
+            index === existingItemIndex ? { ...item, quantity: newQuantity } : item
+          );
+        }
+      }
+      
+      return prevCart;
+    });
+  };
+
   const handleQuantityChange = (product: Product, unit: Unit, change: number) => {
     setCart(prevCart => {
       const existingItemIndex = prevCart.findIndex(item => item.productId === product._id && item.unit.name === unit.name);
@@ -118,6 +152,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     <CartContext.Provider value={{ 
       cart, 
       handleQuantityChange, 
+      updateCartItemQuantity, // Add the new method
       cartItemCount, 
       cartTotal, 
       isLoggedIn, 

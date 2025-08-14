@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#f0f9ff"/>
+  
+  <!-- Background pattern -->
+  <defs>
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1.5" fill="#e0f2fe" opacity="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="400" height="400" fill="url(#dots)"/>
+  
+  <!-- Main icon -->
+  <g transform="translate(200,200)">
+    <!-- Grocery bag -->
+    <path d="M-40,-60 L40,-60 L35,60 L-35,60 Z" fill="#10b981" opacity="0.1" stroke="#10b981" stroke-width="2"/>
+    
+    <!-- Handle -->
+    <path d="M-25,-60 L-25,-75 Q-25,-80 -20,-80 L20,-80 Q25,-80 25,-75 L25,-60" 
+          fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Items in bag -->
+    <!-- Carrot -->
+    <g transform="translate(-15,-20)">
+      <ellipse cx="0" cy="0" rx="3" ry="15" fill="#f97316"/>
+      <path d="M-2,-12 Q-1,-15 0,-15 Q1,-15 2,-12" stroke="#22c55e" stroke-width="1" fill="none"/>
+    </g>
+    
+    <!-- Apple -->
+    <g transform="translate(15,-10)">
+      <circle cx="0" cy="0" r="8" fill="#ef4444"/>
+      <path d="M0,-8 Q2,-10 4,-8" stroke="#22c55e" stroke-width="1" fill="none"/>
+    </g>
+    
+    <!-- Lettuce -->
+    <g transform="translate(0,20)">
+      <ellipse cx="0" cy="0" rx="10" ry="6" fill="#22c55e" opacity="0.8"/>
+      <ellipse cx="0" cy="0" rx="7" ry="4" fill="#16a34a" opacity="0.6"/>
+    </g>
+  </g>
+  
+  <!-- Bottom text -->
+  <text x="200" y="350" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="14">
+    Fresh Groceries
+  </text>
+</svg>

@@ -1,4 +1,5 @@
-import { Header, ProductDetailClient } from '../../components/ClientComponents';
+import { Header} from '../../components/layout/Header';
+import { ProductDetailClient } from '../../components/product/ProductDetailClient';
 import type { Product } from '../../components/CartContext';
 
 // --- SERVER-SIDE DATA FETCHING for a single product ---
