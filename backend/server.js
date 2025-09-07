@@ -12,7 +12,7 @@ const addressRoutes = require('./services/address.routes.js');
 
 // Register CORS
 fastify.register(cors, {
-  origin: "http://localhost:3000",
+  origin: "https://veggiekart-web.onrender.com",
 });
 
 // Product Routes

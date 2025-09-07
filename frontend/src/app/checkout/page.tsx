@@ -20,7 +20,7 @@ export default function CheckoutPage() {
   const fetchAddresses = async () => {
     if (!auth.token) return;
     try {
-      const response = await fetch('http://localhost:5001/api/addresses', {
+      const response = await fetch('https://vegiekart-api.onrender.com/api/addresses', {
           headers: { 'Authorization': `Bearer ${auth.token}` }
       });
       if (!response.ok) throw new Error('Failed to fetch addresses.');
@@ -68,7 +68,7 @@ export default function CheckoutPage() {
 
     // The minimal cart from the context is safe to send directly to the backend
     try {
-        const response = await fetch('http://localhost:5001/api/orders', {
+        const response = await fetch('https://vegiekart-api.onrender.com/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

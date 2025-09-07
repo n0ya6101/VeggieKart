@@ -7,7 +7,7 @@ import type { Product } from '@/app/types';
 
 async function getProduct(id: string): Promise<Product | null> {
   try {
-    const response = await fetch(`http://localhost:5001/api/products/${id}`, { cache: 'no-store' });
+    const response = await fetch(`https://vegiekart-api.onrender.com/api/products/${id}`, { cache: 'no-store' });
     if (!response.ok) return null;
     return response.json();
   } catch (error) {

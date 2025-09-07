@@ -22,7 +22,7 @@ export default function OrderDetailPage() {
     const fetchOrderDetails = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:5001/api/orders/${id}`, {
+        const response = await fetch(`https://vegiekart-api.onrender.com/api/orders/${id}`, {
           headers: { 'Authorization': `Bearer ${auth.token}` },
         });
 

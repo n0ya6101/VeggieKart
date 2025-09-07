@@ -20,7 +20,7 @@ export default function LoginPage() {
     setIsLoading(true);
     setError(null);
 
-    const endpoint = isLoginMode ? 'http://localhost:5001/api/auth/login' : 'http://localhost:5001/api/auth/register';
+    const endpoint = isLoginMode ? 'https://vegiekart-api.onrender.com/api/auth/login' : 'https://vegiekart-api.onrender.com/api/auth/register';
     const body = isLoginMode ? { phone, password } : { name, phone, password };
     try {
       const response = await fetch(endpoint, {

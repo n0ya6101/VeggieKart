@@ -34,7 +34,7 @@ export const AddAddressForm = ({ onAddressAdded, onCancel }: AddAddressFormProps
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/addresses', {
+      const response = await fetch('https://vegiekart-api.onrender.com/api/addresses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

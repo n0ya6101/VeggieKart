@@ -19,7 +19,7 @@ const fetchAddresses = async () => {
       return;
     }
     try {
-      const response = await fetch('http://localhost:5001/api/addresses', {
+      const response = await fetch('https://vegiekart-api.onrender.com/api/addresses', {
         headers: {
           'Authorization': `Bearer ${auth.token}`,
         },
@@ -52,7 +52,7 @@ const fetchAddresses = async () => {
     }
     
     try {
-      const response = await fetch(`http://localhost:5001/api/addresses/${addressId}`, {
+      const response = await fetch(`https://vegiekart-api.onrender.com/api/addresses/${addressId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${auth.token}` },
       });

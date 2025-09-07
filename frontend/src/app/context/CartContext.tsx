@@ -35,7 +35,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(true);
       try {
         // Fetch all products first and store them
-        const productsRes = await fetch('http://localhost:5001/api/products');
+        const productsRes = await fetch('https://vegiekart-api.onrender.com/api/products');
         const products = await productsRes.json();
         setAllProducts(products);
 
@@ -84,7 +84,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const login = async (token: string) => {
     localStorage.setItem('veggiekart-token', token);
     try {
-      const response = await fetch('http://localhost:5001/api/auth/me', {
+      const response = await fetch('https://vegiekart-api.onrender.com/api/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       if (!response.ok) throw new Error('Failed to fetch user profile');
