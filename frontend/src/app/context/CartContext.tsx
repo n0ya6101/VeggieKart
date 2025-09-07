@@ -1,7 +1,13 @@
 'use client';
 
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import type { Product, Unit, CartItem, DisplayCartItem, User } from '../types';
+
+interface AuthState {
+  token: string | null;
+  isLoggedIn: boolean;
+  user: User | null;
+}
 
 interface CartContextType {
   displayCart: DisplayCartItem[];
@@ -13,7 +19,7 @@ interface CartContextType {
   isCartSidebarOpen: boolean;
   toggleCartSidebar: () => void;
   clearCart: () => void;
-  auth: any;
+  auth: AuthState;
   login: (token: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -27,61 +33,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isCartSidebarOpen, setIsCartSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [auth, setAuth] = useState<{ token: string | null; isLoggedIn: boolean; user: User | null }>({ token: null, isLoggedIn: false, user: null });
+  const [auth, setAuth] = useState<AuthState>({ token: null, isLoggedIn: false, user: null });
 
-  // Step 1: Load all initial data
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch all products first and store them
-        const productsRes = await fetch('https://vegiekart-api.onrender.com/api/products');
-        const products = await productsRes.json();
-        setAllProducts(products);
-
-        // Then, load cart and auth state
-        const localCart = localStorage.getItem('veggiekart-cart');
-        if (localCart) setCart(JSON.parse(localCart));
-        
-        const token = localStorage.getItem('veggiekart-token');
-        if (token) await login(token);
-      } catch (error) {
-        console.error("Failed to load initial data", error);
-      } finally {
-        // Only set loading to false after everything is fetched
-        setIsLoading(false);
-      }
-    };
-    loadInitialData();
+  const logout = useCallback(() => {
+    localStorage.removeItem('veggiekart-token');
+    setAuth({ token: null, isLoggedIn: false, user: null });
   }, []);
 
-  // Step 2: Hydrate the cart ONLY when data is ready
-  useEffect(() => {
-    // Do not run this effect if products haven't loaded yet
-    if (allProducts.length === 0) {
-      setDisplayCart([]); // Ensure display cart is empty if there are no products
-      return;
-    }
-
-    // Create a map for efficient lookups
-    const unitMap = new Map(allProducts.flatMap(p => p.allowedUnits.map(u => [u.id, { unit: u, product: p }])));
-    
-    const newDisplayCart = cart.map(item => {
-      const details = unitMap.get(item.unitId);
-      // If a unit from the cart doesn't exist in our products (e.g., it was deleted), skip it
-      if (!details) return null;
-      return { ...item, product: details.product, unit: details.unit };
-    }).filter((item): item is DisplayCartItem => item !== null);
-
-    setDisplayCart(newDisplayCart);
-    
-    // Also, update localStorage here
-    if (!isLoading) {
-      localStorage.setItem('veggiekart-cart', JSON.stringify(cart));
-    }
-  }, [cart, allProducts, isLoading]);
-
-  const login = async (token: string) => {
+  const login = useCallback(async (token: string) => {
     localStorage.setItem('veggiekart-token', token);
     try {
       const response = await fetch('https://vegiekart-api.onrender.com/api/auth/me', {
@@ -94,12 +53,44 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       console.error(error);
       logout();
     }
-  };
+  }, [logout]);
 
-  const logout = () => {
-    localStorage.removeItem('veggiekart-token');
-    setAuth({ token: null, isLoggedIn: false, user: null });
-  };
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        const productsRes = await fetch('https://vegiekart-api.onrender.com/api/products');
+        const products = await productsRes.json();
+        setAllProducts(products);
+
+        const localCart = localStorage.getItem('veggiekart-cart');
+        if (localCart) setCart(JSON.parse(localCart));
+        
+        const token = localStorage.getItem('veggiekart-token');
+        if (token) await login(token);
+      } catch (error) {
+        console.error("Failed to load initial data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadInitialData();
+  }, [login]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem('veggiekart-cart', JSON.stringify(cart));
+    }
+    
+    const unitMap = new Map(allProducts.flatMap(p => p.allowedUnits.map(u => [u.id, { unit: u, product: p }])));
+    const newDisplayCart = cart.map(item => {
+      const details = unitMap.get(item.unitId);
+      if (!details) return null;
+      return { ...item, product: details.product, unit: details.unit };
+    }).filter((item): item is DisplayCartItem => item !== null);
+
+    setDisplayCart(newDisplayCart);
+  }, [cart, allProducts, isLoading]);
 
   const toggleCartSidebar = () => setIsCartSidebarOpen(prev => !prev);
   const clearCart = () => setCart([]);

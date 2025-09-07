@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from '../../context/CartContext';
-import type { Product, Unit } from '../../types';
+import type { Product } from '../../types';
 
 export const ProductDetailClient = ({ product }: { product: Product }) => {
   const { handleQuantityChange, getQuantityForUnit } = useCart();

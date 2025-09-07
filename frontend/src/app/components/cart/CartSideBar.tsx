@@ -2,7 +2,7 @@
 
 import { useCart } from '../../context/CartContext';
 import { useRouter } from 'next/navigation';
-import type { Product, DisplayCartItem } from '../../types';
+import type { DisplayCartItem } from '../../types';
 
 export const CartSidebar = () => {
   const { displayCart, handleQuantityChange, cartTotal, auth, isCartSidebarOpen, toggleCartSidebar, isLoading } = useCart();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from '../../context/CartContext';
-import type { Product, Unit } from '../../types';
+import type { Product } from '../../types';
 
 interface UnitSelectionModalProps {
   product: Product;

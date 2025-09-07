@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../context/CartContext';
 import { Header } from '../components/ui/Header';
 import { AddAddressForm } from '../components/ui/AddAddressForm';
-import type { Address, DisplayCartItem } from '../types';
+import type { Address } from '../types';
 
 export default function CheckoutPage() {
   const { displayCart, cartTotal, auth, clearCart, isLoading, cart } = useCart();
@@ -17,7 +17,7 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (!auth.token) return;
     try {
       const response = await fetch('https://vegiekart-api.onrender.com/api/addresses', {
@@ -32,14 +32,14 @@ export default function CheckoutPage() {
         const defaultAddress = data.find(addr => addr.isDefault) || data[0];
         setSelectedAddressId(defaultAddress.id);
       }
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message);
+    } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        else setError("An unknown error occurred.");
     }
-  };
+  }, [auth.token, selectedAddressId]);
 
   useEffect(() => {
-    if (isLoading) return; // Wait for the context to finish loading
+    if (isLoading) return;
 
     if (!auth.isLoggedIn) {
       router.push('/login');
@@ -50,11 +50,10 @@ export default function CheckoutPage() {
       return;
     }
     fetchAddresses();
-  }, [auth.isLoggedIn, auth.token, cart.length, router, isLoading]);
+  }, [auth.isLoggedIn, auth.token, cart.length, router, isLoading, fetchAddresses]);
   
-  const handleAddressAdded = (newAddress: Address) => {
+  const handleAddressAdded = () => {
     fetchAddresses();
-    setSelectedAddressId(newAddress.id);
     setShowAddAddressForm(false);
   };
 
@@ -65,39 +64,34 @@ export default function CheckoutPage() {
     }
     setIsPlacingOrder(true);
     setError(null);
-
-    // The minimal cart from the context is safe to send directly to the backend
+    
     try {
         const response = await fetch('https://vegiekart-api.onrender.com/api/orders', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
             body: JSON.stringify({ cart: cart, shippingAddressId: selectedAddressId })
         });
-        
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Failed to place order.');
 
         alert('Order placed successfully!');
         clearCart();
         router.push('/orders');
-
-    } catch (err: any) {
-        setError(err.message);
+    } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        else setError("An unknown error occurred.");
     } finally {
         setIsPlacingOrder(false);
     }
   };
   
   if (isLoading || !auth.isLoggedIn) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-screen"><p>Loading...</p></div>;
   }
+
+
+
+
 
   return (
     <div className="bg-gray-50 min-h-screen">

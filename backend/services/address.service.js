@@ -1,7 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-const serviceablePincodes = process.env.SERVICEABLE_PINCODES.split(',');
+const serviceablePincodes = "400001,400002,400003,400004,400005,400006,400007,400008,400009,400010".split(',');
 
 async function getUserAddresses(userId) {
   return prisma.address.findMany({

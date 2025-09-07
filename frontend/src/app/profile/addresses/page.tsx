@@ -29,8 +29,9 @@ const fetchAddresses = async () => {
       }
       const data = await response.json();
       setAddresses(data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+        else setError("An unknown error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +46,6 @@ const fetchAddresses = async () => {
     setShowAddAddressForm(false);
   };
 
-  // ** NEW FUNCTION **
   const handleDeleteAddress = async (addressId: string) => {
     if (!window.confirm("Are you sure you want to delete this address?")) {
       return;
@@ -65,8 +65,9 @@ const fetchAddresses = async () => {
       // Refetch addresses to update the UI
       fetchAddresses();
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("An unknown error occurred.");
     }
   };
 
