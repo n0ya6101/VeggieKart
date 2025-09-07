@@ -74,7 +74,7 @@ export default function OrderDetailPage() {
       <Header />
       <main className="container mx-auto p-10">
         <Link href="/profile/orders" className="text-green-600 hover:underline text-sm">&larr; Back to all orders</Link>
-        <div className="mt-4 bg-white p-6 rounded-lg shadow">
+        <div className="mt-4 bg-white p-6 text-gray-700 rounded-lg shadow">
             <div className="flex justify-between items-start">
                 <div>
                     <h1 className="text-2xl font-bold">Order Details</h1>
