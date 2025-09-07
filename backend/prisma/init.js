@@ -10,7 +10,7 @@ async function main() {
     console.log('Checking if database needs seeding...');
     
     // Check if this specific seed has been run before
-    const seedMarker = await prisma._seedingHistory.findUnique({
+    const seedMarker = await prisma.seedingHistory.findUnique({
       where: { seedName: SEED_NAME },
     });
 
@@ -41,7 +41,7 @@ async function main() {
       });
 
       // Mark this seed as complete in the database
-      await prisma._seedingHistory.create({
+      await prisma.seedingHistory.create({
         data: { seedName: SEED_NAME },
       });
       console.log('Seeding marker created.');
