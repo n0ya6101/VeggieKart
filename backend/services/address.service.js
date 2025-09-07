@@ -11,10 +11,7 @@ async function getUserAddresses(userId) {
 }
 
 async function createAddress(userId, addressData) {
-  const { addressLine, pincode, city, state, isDefault } = addressData;
-
-  
-  
+  const { addressLine, pincode, city, isDefault } = addressData;
 
   if (!serviceablePincodes.includes(pincode)) {
     throw new Error('Sorry, we currently are only servicing select areas in Sambhajinagar. Please check the pincode and try again.');
@@ -22,7 +19,7 @@ async function createAddress(userId, addressData) {
 
   if (isDefault) {
     await prisma.address.updateMany({
-      where: { userId },
+      where: { userId, isDefault: true },
       data: { isDefault: false },
     });
   }
@@ -33,11 +30,31 @@ async function createAddress(userId, addressData) {
       addressLine,
       pincode,
       city,
-      state,
+      state: 'Maharashtra',
       isDefault,
     },
   });
 }
 
 
-module.exports = { getUserAddresses, createAddress };
+async function deleteAddress(userId, addressId) {
+  const address = await prisma.address.findUnique({
+    where: { id: addressId },
+  });
+
+  if (!address || address.userId !== userId) {
+    throw new Error('Address not found or you do not have permission to delete it.');
+  }
+
+  const addressCount = await prisma.address.count({ where: { userId } });
+  if (addressCount <= 1) {
+    throw new Error('You cannot delete your only address.');
+  }
+
+  return prisma.address.delete({
+    where: { id: addressId },
+  });
+}
+
+
+module.exports = { getUserAddresses, createAddress, deleteAddress };

@@ -5,11 +5,11 @@ async function authRoutes(fastify, options) {
   // --- Registration Route ---
   fastify.post('/register', async (request, reply) => {
     try {
-      const { phone, password } = request.body;
+      const { name, phone, password } = request.body;
       if (!phone || !password) {
         return reply.status(400).send({ message: 'Phone and password are required.' });
       }
-      const user = await authService.registerUser({ phone, password });
+      const user = await authService.registerUser({ name, phone, password });
       reply.status(201).send({ message: 'User created successfully', userId: user.id });
     } catch (error) {
       reply.status(409).send({ message: error.message });

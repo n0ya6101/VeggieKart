@@ -9,10 +9,10 @@ interface UnitSelectionModalProps {
 }
 
 export const UnitSelectionModal = ({ product, onClose }: UnitSelectionModalProps) => {
-  const { cart, handleQuantityChange } = useCart();
+  const { handleQuantityChange, getQuantityForUnit } = useCart();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50">
       <div className="bg-white rounded-2xl p-5 w-full max-w-sm mx-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">{product.name}</h2>
@@ -24,8 +24,7 @@ export const UnitSelectionModal = ({ product, onClose }: UnitSelectionModalProps
             const discountedPrice = hasDiscount
               ? unit.price - (unit.price * (unit.discountPercentage / 100))
               : unit.price;
-            const cartItem = cart.find(item => item.productId === product.id && item.unit.id === unit.id);
-            const quantity = cartItem ? cartItem.quantity : 0;
+            const quantityInCart = getQuantityForUnit(unit.id);
 
             return (
               <div key={unit.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -36,10 +35,10 @@ export const UnitSelectionModal = ({ product, onClose }: UnitSelectionModalProps
                     {hasDiscount && <p className="text-xs text-gray-800 line-through">₹{unit.price}</p>}
                   </div>
                 </div>
-                {quantity > 0 ? (
+                {quantityInCart > 0 ? (
                   <div className="flex items-center border border-green-600 rounded-md">
                     <button onClick={() => handleQuantityChange(product, unit, -1)} className="px-3 py-1 text-green-600 font-bold text-lg">-</button>
-                    <span className="px-3 py-1 text-sm font-bold text-gray-900">{quantity}</span>
+                    <span className="px-3 py-1 text-sm font-bold text-gray-900">{quantityInCart}</span>
                     <button onClick={() => handleQuantityChange(product, unit, 1)} className="px-3 py-1 text-green-600 font-bold text-lg">+</button>
                   </div>
                 ) : (

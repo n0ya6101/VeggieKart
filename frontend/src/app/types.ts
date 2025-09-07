@@ -5,7 +5,6 @@ export interface Unit {
   discountPercentage: number;
 }
 
-// Represents the detailed description of a product
 export interface Description {
   id: string;
   details: string;
@@ -15,7 +14,6 @@ export interface Description {
   seller: string;
 }
 
-// Represents a single product from your catalog
 export interface Product {
   id: string;
   name: string;
@@ -26,25 +24,26 @@ export interface Product {
   description?: Description | null;
 }
 
-// Represents an item in the user's shopping cart
+// The cart will ONLY store this minimal information
 export interface CartItem {
-  productId: string;
-  name: string;
+  unitId: string;
   quantity: number;
-  unit: Unit;
-  maxOrderLimit: number;
-  imageUrl?: string | null;
 }
 
-// Represents a logged-in user's data
+// We'll create this "Display" version temporarily inside components for rendering
+export interface DisplayCartItem extends CartItem {
+  product: Product;
+  unit: Unit;
+}
+
 export interface User {
   id: string;
+  name?: string | null;
   phone: string;
   email?: string | null;
   role: 'CUSTOMER' | 'ADMIN' | 'DELIVERY_PARTNER';
 }
 
-// Represents a user's saved address
 export interface Address {
   id: string;
   addressLine: string;
@@ -52,4 +51,21 @@ export interface Address {
   city: string;
   state: string;
   isDefault: boolean;
+}
+
+export interface OrderItem {
+  id: string;
+  quantity: number;
+  priceAtPurchase: number;
+  product: Product;
+  unit: Unit;
+}
+
+export interface Order {
+  id: string;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  items: OrderItem[];
+  shippingAddress?: Address;
 }

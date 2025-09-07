@@ -22,9 +22,22 @@ async function addressRoutes(fastify, options) {
       reply.status(201).send(address);
     } catch (error) {
       fastify.log.error(error);
-      reply.status(500).send({ message: 'Error creating address' });
+      reply.status(400).send({ message: error.message });
+    }
+  });
+
+
+  fastify.delete('/:id', async (request, reply) => {
+    try {
+      const { userId } = request.user;
+      const { id } = request.params;
+      await addressService.deleteAddress(userId, id);
+      reply.status(204).send();
+    } catch (error) {
+      fastify.log.error(error);
+      reply.status(400).send({ message: error.message });
     }
   });
 }
 
-module.exports = addressRoutes;
+module.exports = addressRoutes; 

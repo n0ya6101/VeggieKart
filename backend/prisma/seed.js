@@ -1,17 +1,32 @@
 const { PrismaClient } = require('@prisma/client');
+const { generateNextId } = require('../services/id.service.js');
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Start seeding ...');
 
-  // Clear old data
+  // Clear old data in the correct order
+  await prisma.inventory.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.address.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.unit.deleteMany();
   await prisma.description.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.idSequence.deleteMany();
   console.log('🧹 Cleared previous data.');
 
-  // Product Catalog
-  const products = [
+  await prisma.idSequence.createMany({
+    data: [
+      { name: 'product', value: 1000 },
+      { name: 'order', value: 1000 },
+    ],
+  });
+  console.log('🔢 Initialized ID sequences.');
+
+
+  const productsData = [
     {
       name: 'Cauliflower',
       category: 'Vegetable',
@@ -302,17 +317,32 @@ async function main() {
     },
   ];
 
-  for (const p of products) {
-    await prisma.product.create({
+     for (const pData of productsData) {
+    const newProductId = await generateNextId('product', 'PROD-');
+    
+    const product = await prisma.product.create({
       data: {
-        name: p.name,
-        category: p.category,
-        maxOrderLimit: p.maxOrderLimit,
-        allowedUnits: { create: p.allowedUnits },
-        description: { create: p.description },
+        id: newProductId, 
+        name: pData.name,
+        category: pData.category,
+        maxOrderLimit: pData.maxOrderLimit,
+        allowedUnits: { create: pData.allowedUnits },
+        description: { create: pData.description },
+      },
+      include: {
+        allowedUnits: true,
       },
     });
-    console.log(`✅ Seeded: ${p.name}`);
+
+    for (const unit of product.allowedUnits) {
+      await prisma.inventory.create({
+        data: {
+          unitId: unit.id,
+          quantity: 100, 
+        },
+      });
+    }
+     console.log(`✅ Seeded: ${product.name} with ID: ${product.id}`);
   }
 
   console.log('🌱 Seeding finished.');

@@ -1,51 +1,71 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { generateNextId } = require('./id.service.js');
 
 async function createOrder(userId, cart, shippingAddressId) {
-  // Prisma's interactive transaction ensures all operations succeed or none do.
-  return prisma.$transaction(async (tx) => {
-    // 1. Verify stock for all items in the cart
-    for (const item of cart) {
-      const inventory = await tx.inventory.findUnique({
-        where: { unitId: item.unit.id },
-      });
+  if (!cart || cart.length === 0) {
+    throw new Error("Cart cannot be empty.");
+  }
 
-      if (!inventory || inventory.quantity < item.quantity) {
-        throw new Error(`Not enough stock for ${item.name} (${item.unit.name})`);
+  const newOrderId = await generateNextId('order', 'ORD-');
+
+  return prisma.$transaction(async (tx) => {
+    let calculatedTotal = 0;
+    
+    const unitIds = cart.map(item => item.unitId);
+    
+    const unitsInDb = await tx.unit.findMany({
+      where: { id: { in: unitIds } },
+      include: { 
+        inventory: true, 
+        product: true 
       }
+    });
+
+    const unitsMap = new Map(unitsInDb.map(u => [u.id, u]));
+
+    for (const item of cart) {
+      const unitFromDb = unitsMap.get(item.unitId);
+
+      if (!unitFromDb) {
+        throw new Error(`An item in your cart is no longer available.`);
+      }
+
+      if (!unitFromDb.inventory || unitFromDb.inventory.quantity < item.quantity) {
+        throw new Error(`Not enough stock for ${unitFromDb.product.name} (${unitFromDb.name}). Only ${unitFromDb.inventory?.quantity || 0} left.`);
+      }
+
+      const price = unitFromDb.discountPercentage > 0
+        ? unitFromDb.price - (unitFromDb.price * (unitFromDb.discountPercentage / 100))
+        : unitFromDb.price;
+      calculatedTotal += price * item.quantity;
     }
 
-    // 2. If stock is sufficient, decrement inventory for each item
-    const stockUpdates = cart.map(item => 
+    const stockUpdates = cart.map(item =>
       tx.inventory.update({
-        where: { unitId: item.unit.id },
+        where: { unitId: item.unitId },
         data: { quantity: { decrement: item.quantity } },
       })
     );
     await Promise.all(stockUpdates);
 
-    // 3. Calculate total amount based on current prices
-    const totalAmount = cart.reduce((sum, item) => {
-      const price = item.unit.discountPercentage > 0
-        ? item.unit.price - (item.unit.price * (item.unit.discountPercentage / 100))
-        : item.unit.price;
-      return sum + (price * item.quantity);
-    }, 0);
-
-    // 4. Create the Order and OrderItems
     const order = await tx.order.create({
       data: {
+        id: newOrderId,
         userId,
         shippingAddressId,
-        totalAmount,
+        totalAmount: calculatedTotal,
         status: 'CONFIRMED',
         items: {
-          create: cart.map(item => ({
-            productId: item.productId,
-            unitId: item.unit.id,
-            quantity: item.quantity,
-            priceAtPurchase: item.unit.price, // Store the original price
-          })),
+          create: cart.map(item => {
+            const unitFromDb = unitsMap.get(item.unitId);
+            return {
+              productId: unitFromDb.productId,
+              unitId: item.unitId,
+              quantity: item.quantity,
+              priceAtPurchase: unitFromDb.price,
+            };
+          }),
         },
       },
       include: {
@@ -72,4 +92,22 @@ async function getUserOrders(userId) {
     });
 }
 
-module.exports = { createOrder, getUserOrders };
+async function getOrderById(userId, orderId) {
+  return prisma.order.findFirst({
+    where: {
+      id: orderId,
+      userId: userId,
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+          unit: true,
+        },
+      },
+      shippingAddress: true,
+    },
+  });
+}
+
+module.exports = { createOrder, getUserOrders, getOrderById };

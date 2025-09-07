@@ -18,7 +18,6 @@ export const AddAddressForm = ({ onAddressAdded, onCancel }: AddAddressFormProps
   const [addressLine, setAddressLine] = useState('');
   const [pincode, setPincode] = useState('');
   const [city, setCity] = useState('');
-  const [state, setState] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +40,8 @@ export const AddAddressForm = ({ onAddressAdded, onCancel }: AddAddressFormProps
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${auth.token}`,
         },
-        body: JSON.stringify({ addressLine, pincode, city, state, isDefault }),
+        // The body no longer includes the "state" field
+        body: JSON.stringify({ addressLine, pincode, city, isDefault }),
       });
 
       const data = await response.json();
@@ -50,7 +50,7 @@ export const AddAddressForm = ({ onAddressAdded, onCancel }: AddAddressFormProps
         throw new Error(data.message || 'Failed to add address.');
       }
 
-      onAddressAdded(data); // Pass the new address back to the parent component
+      onAddressAdded(data);
 
     } catch (err: any) {
       setError(err.message);
@@ -66,7 +66,7 @@ export const AddAddressForm = ({ onAddressAdded, onCancel }: AddAddressFormProps
         <label htmlFor="addressLine" className="block text-sm font-medium text-gray-700">Address Line</label>
         <input type="text" id="addressLine" value={addressLine} onChange={(e) => setAddressLine(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="pincode" className="block text-sm font-medium text-gray-700">Pincode</label>
           <input type="text" id="pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" />
@@ -74,10 +74,6 @@ export const AddAddressForm = ({ onAddressAdded, onCancel }: AddAddressFormProps
         <div>
           <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
           <input type="text" id="city" value={city} onChange={(e) => setCity(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" />
-        </div>
-        <div>
-          <label htmlFor="state" className="block text-sm font-medium text-gray-700">State</label>
-          <input type="text" id="state" value={state} onChange={(e) => setState(e.target.value)} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" />
         </div>
       </div>
        <div className="flex items-center">

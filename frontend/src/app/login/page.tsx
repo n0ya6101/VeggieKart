@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 export default function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [phone, setPhone] = useState('');
+  const [name, setName] = useState(''); 
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,12 +21,12 @@ export default function LoginPage() {
     setError(null);
 
     const endpoint = isLoginMode ? 'http://localhost:5001/api/auth/login' : 'http://localhost:5001/api/auth/register';
-
+    const body = isLoginMode ? { phone, password } : { name, phone, password };
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, password }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -35,7 +36,7 @@ export default function LoginPage() {
       }
 
       if (isLoginMode) {
-        login(data.token, data.userId); // Save token and update global state
+        await login(data.token); // FIX: Pass only the token to the login function
         router.push('/'); // Redirect to homepage on successful login
       } else {
         // Switch to login mode after successful registration
@@ -61,6 +62,20 @@ export default function LoginPage() {
           </h2>
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
+           {!isLoginMode && (
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-800">Full Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-3 py-2 mt-1 border border-gray-300 text-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+              />
+            </div>
+          )}
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-800">Phone Number</label>
             <input

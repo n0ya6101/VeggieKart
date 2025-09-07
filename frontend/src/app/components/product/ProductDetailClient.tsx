@@ -4,7 +4,7 @@ import { useCart } from '../../context/CartContext';
 import type { Product, Unit } from '../../types';
 
 export const ProductDetailClient = ({ product }: { product: Product }) => {
-  const { cart, handleQuantityChange } = useCart();
+  const { handleQuantityChange, getQuantityForUnit } = useCart();
   const desc = product.description; 
 
   return (
@@ -20,7 +20,7 @@ export const ProductDetailClient = ({ product }: { product: Product }) => {
           
           <div className="mt-6">
             {product.allowedUnits.map(unit => {
-              const cartItem = cart.find(item => item.productId === product.id && item.unit.id === unit.id);
+              const quantityInCart = getQuantityForUnit(unit.id);
               const discountedPrice = unit.discountPercentage > 0 
                 ? unit.price - (unit.price * (unit.discountPercentage / 100)) 
                 : unit.price;
@@ -34,10 +34,10 @@ export const ProductDetailClient = ({ product }: { product: Product }) => {
                       {unit.discountPercentage > 0 && <p className="text-md text-gray-800 line-through">₹{unit.price}</p>}
                     </div>
                   </div>
-                  {cartItem ? (
+                  {quantityInCart > 0 ? (
                     <div className="flex items-center border border-green-600 rounded-md">
                       <button onClick={() => handleQuantityChange(product, unit, -1)} className="px-4 py-2 text-green-600 font-bold text-xl">-</button>
-                      <span className="px-4 py-2 text-md font-bold">{cartItem.quantity}</span>
+                      <span className="px-4 py-2 text-md font-bold">{quantityInCart}</span>
                       <button onClick={() => handleQuantityChange(product, unit, 1)} className="px-4 py-2 text-green-600 font-bold text-xl">+</button>
                     </div>
                   ) : (
